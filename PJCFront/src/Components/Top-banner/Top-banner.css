@@ -1,0 +1,14 @@
+/* Верхняя плашка (баннер) */
+.top-banner {
+    width: 100vw;
+    background: #1f1f1f; /* Темно-серый */
+    padding: 1.5rem;
+    text-align: left;
+    color: #e0e0e0; /* Светлый текст */
+    font-size: 2.5rem;
+    font-weight: 800;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
