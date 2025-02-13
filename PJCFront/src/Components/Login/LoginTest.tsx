@@ -1,25 +1,26 @@
 // src/components/Login.tsx
-import React, { useState, useContext } from 'react';
-import api from '../../api/axios'; // axios instance с interceptor-ом для JWT
-import { AuthContext } from '../../contexts/AuthContext';
-import './Login.css';
+import React, { useState } from 'react';
+import "./Login.css";
+import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 
 const Login: React.FC = () => {
-  const { login } = useContext(AuthContext);
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const history = useHistory();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      // Предполагается, что сервер принимает username и password
-      const response = await api.post('/login', { username, password });
-      const token = response.data.token;
-      login(token);
-    } catch (err) {
-      setError('Неверное имя пользователя или пароль');
+      const response = await axios.post('http://yourapi.com/login', { username, password });
+      const { token } = response.data;
+      // Сохраняем токен (например, в localStorage)
+      localStorage.setItem('jwt', token);
+      // Перенаправляем пользователя на защищённую страницу
+      history.push('/dashboard');
+    } catch (error) {
+      console.error('Ошибка аутентификации:', error);
+      // Здесь можно вывести уведомление об ошибке
     }
   };
 
@@ -29,7 +30,6 @@ const Login: React.FC = () => {
         <h2>Welcome Back!</h2>
         <p>Please sign in to continue</p>
       </div>
-      {error && <p className="error" style={{ color: 'red' }}>{error}</p>}
       <form className="login-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="username">Username</label>
