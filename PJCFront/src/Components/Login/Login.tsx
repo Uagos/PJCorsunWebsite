@@ -29,7 +29,7 @@ const Login: React.FC = () => {
         <h2>Welcome Back!</h2>
         <p>Please sign in to continue</p>
       </div>
-      {error && <p className="error" style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error-message">{error}</p>}
       <form className="login-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="username">Username</label>

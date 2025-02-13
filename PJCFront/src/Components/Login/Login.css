@@ -81,3 +81,14 @@
     margin-top: 1rem;
     text-align: center;
   }
+  /* Стиль для ошибки */
+.error-message {
+  color: #ff4d4d; /* Красный цвет ошибки */
+  background: #2c2c2c; /* Темный фон, чтобы соответствовать стилю */
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ff4d4d;
+}
