@@ -1,7 +1,8 @@
+// pjcfront/src/App.tsx
 import React, { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import "./App.css";
-import LoginPage from "./Components/Login/Login";
+import LoginPage from "./Components/LoginPage/LoginPage";
 import MainPage from "./Components/MainPage/MainPage";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
 import { AuthContext } from "./contexts/AuthContext";
@@ -11,8 +12,8 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <Routes>
-        {/* Если токен есть, редирект на dashboard, иначе login */}
+      <Routes key={token}> {/* Форсируем обновление маршрутов при изменении токена */}
+        {/* Редирект с "/" на "/login" или "/dashboard" */}
         <Route path="/" element={<Navigate to={token ? "/dashboard" : "/login"} replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route

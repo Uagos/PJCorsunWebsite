@@ -12,16 +12,18 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    try {
-      // Предполагается, что сервер принимает username и password
-      const response = await api.post('/login', { username, password });
-      const token = response.data.token;
-      login(token);
-    } catch (err) {
-      setError('Неверное имя пользователя или пароль');
-    }
+  try {
+    const response = await api.post('/login', { username, password });
+    console.log('Response:', response); // Логируем весь объект ответа
+    console.log('Response data:', response.data); // Логируем данные ответа
+    const token = response.data.token;
+    login(token);
+  } catch (err) {
+    console.error('Login error:', err);
+    setError('Неверное имя пользователя или пароль');
+  }
   };
+  
 
   return (
     <div className="login-container">

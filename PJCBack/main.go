@@ -8,5 +8,6 @@ import (
 
 func main() {
 	// Запуск сервера
+	print("Server is running")
 	server.Run()
 }

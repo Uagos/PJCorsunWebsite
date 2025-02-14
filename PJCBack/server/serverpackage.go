@@ -14,6 +14,25 @@ import (
 // Пример секрета для подписи JWT
 var jwtKey = []byte("secret_key")
 
+// --- CORS middleware ---
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Разрешаем доступ со всех источников
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		// Разрешаем указанные методы
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		// Разрешаем указанные заголовки
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Если запрос OPTIONS, сразу завершаем обработку
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 // Структура для входа
 type Credentials struct {
 	Username string `json:"username"`
@@ -28,7 +47,6 @@ type Claims struct {
 
 // Генерация токена
 func generateJWT(username string) (string, error) {
-	// Время жизни токена
 	expirationTime := time.Now().Add(5 * time.Minute)
 	claims := &Claims{
 		Username: username,
@@ -37,7 +55,6 @@ func generateJWT(username string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// Подпись токена
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		return "", err
@@ -48,26 +65,22 @@ func generateJWT(username string) (string, error) {
 // Обработчик логина
 func login(w http.ResponseWriter, r *http.Request) {
 	var creds Credentials
-	// Прочитаем тело запроса в переменную creds
 	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Здесь ты можешь добавить свою логику проверки логина и пароля
 	if creds.Username != "admin" || creds.Password != "password" {
-		http.Error(w, "Неверное имя пользователя или пароль", http.StatusUnauthorized)
+		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
-	// Генерация токена
 	token, err := generateJWT(creds.Username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Отправка токена пользователю
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, `{"token":"%s"}`, token)
 }
@@ -75,8 +88,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 // Запуск сервера
 func Run() {
 	r := mux.NewRouter()
-	r.HandleFunc("/login", login).Methods("POST")
 
-	// Запуск сервера
+	// Добавляем CORS middleware ко всем маршрутам
+	r.Use(corsMiddleware)
+
+	// Маршрут логина
+	r.HandleFunc("/login", login).Methods("POST", "OPTIONS")
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
