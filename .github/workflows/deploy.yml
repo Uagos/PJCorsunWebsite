@@ -15,20 +15,50 @@ jobs:
       - name: Build frontend
         run: |
           cd PJCFront
-          npm install
+          npm ci # Более надежная установка зависимостей
           npm run build
+
+      - name: Verify frontend build
+        run: ls -l PJCFront/dist || echo "Frontend build failed!"
 
       - name: Build backend
         run: |
           cd PJCBack
-          go build -o backend main.go
+          go build -v -o backend main.go
+
+      - name: Verify backend binary
+        run: |
+          if [ ! -f PJCBack/backend ]; then
+            echo "Backend binary not found!"
+            exit 1
+          fi
+          file PJCBack/backend # Проверка архитектуры бинарника
 
       - name: Deploy to VPS
         run: |
+          # Setup SSH configuration
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
-          scp -r PJCFront/dist ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:/var/www/pjcorsun
-          scp PJCBack/backend ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:/var/www/pjcorsun/backend
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "sudo systemctl restart pjcorsun-backend"
+          ssh-keyscan -H "${{ secrets.VPS_IP }}" >> ~/.ssh/known_hosts
+
+          # Prepare server directories
+          ssh -i ~/.ssh/id_ed25519 \
+            "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}" \
+            "sudo mkdir -p /var/www/pjcorsun/backend && \
+             sudo chown -R ${{ secrets.VPS_USER }}:${{ secrets.VPS_USER }} /var/www/pjcorsun"
+
+          # Deploy frontend
+          scp -r -i ~/.ssh/id_ed25519 \
+            PJCFront/dist \
+            "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}":/var/www/pjcorsun/
+
+          # Deploy backend
+          scp -i ~/.ssh/id_ed25519 \
+            PJCBack/backend \
+            "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}":/var/www/pjcorsun/backend/
+
+          # Restart service
+          ssh -i ~/.ssh/id_ed25519 \
+            "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}" \
+            "sudo systemctl restart pjcorsun-backend"
