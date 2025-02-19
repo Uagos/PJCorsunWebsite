@@ -1,10 +1,13 @@
 package main
 
 import (
-	serverpackage "sitebackend/server" // замените на реальный модульный путь
+	"sitebackend/server"
 )
 
+// замените на реальный модульный путь
+
 func main() {
-	s := serverpackage.NewServer()
-	s.StartServer()
+	// Запуск сервера
+	print("Server is running")
+	server.Run()
 }
