@@ -1,29 +1,30 @@
 // src/components/Login.tsx
-import React, { useState, useContext } from 'react';
-import api from '../../api/axios'; // axios instance с interceptor-ом для JWT
-import { AuthContext } from '../../contexts/AuthContext';
+import React, { useState } from 'react';
 import './Login.css';
+import api from '../../api/axios';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
-  const { login } = useContext(AuthContext);
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
 
+  const [username, setUsername] = useState(''); // Состояние для имени пользователя
+  const [password, setPassword] = useState(''); // Состояние для пароля
+  const [error, setError] = useState(false); // Состояние для ошибки
+
+  const navigate = useNavigate(); 
+  
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  try {
-    const response = await api.post('/login', { username, password });
-    console.log('Response:', response); // Логируем весь объект ответа
-    console.log('Response data:', response.data); // Логируем данные ответа
-    const token = response.data.token;
-    login(token);
-  } catch (err) {
-    console.error('Login error:', err);
-    setError('Неверное имя пользователя или пароль');
+    setError(false);
+
+    try {
+      const response = await api.post('/login', { username, password }); 
+      localStorage.setItem('token', response.data.token);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Ошибка при логине:', error);
+      setError(true);
+    }
   }
-  };
-  
 
   return (
     <div className="login-container">
@@ -31,7 +32,7 @@ const Login: React.FC = () => {
         <h2>Welcome Back!</h2>
         <p>Please sign in to continue</p>
       </div>
-      {error && <p className="error-message">{error}</p>}
+      {error && <p className="error-message">{"error"}</p>}
       <form className="login-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="username">Username</label>
