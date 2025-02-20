@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://38.180.229.202:8080', // Замените на URL вашего API
+  baseURL: 'http://localhost:8080', // Замените на URL вашего API
 });
 
 api.interceptors.request.use(
