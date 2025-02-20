@@ -12,7 +12,7 @@ import (
 )
 
 // Пример секрета для подписи JWT
-var jwtKey = []byte("secret_key")
+var jwtKey = []byte("PJCorSUn25")
 
 // --- CORS middleware ---
 func corsMiddleware(next http.Handler) http.Handler {
