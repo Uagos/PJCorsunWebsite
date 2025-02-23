@@ -15,7 +15,7 @@ jobs:
       - name: Build frontend
         run: |
           cd PJCFront
-          npm ci # Более надежная установка зависимостей
+          npm ci
           npm run build
 
       - name: Verify frontend build
@@ -32,7 +32,8 @@ jobs:
             echo "Backend binary not found!"
             exit 1
           fi
-          file PJCBack/backend # Проверка архитектуры бинарника
+          file PJCBack/backend
+
       - name: Deploy to VPS
         run: |
           # Setup SSH configuration
@@ -42,26 +43,22 @@ jobs:
           ssh-keyscan -H "${{ secrets.VPS_IP }}" >> ~/.ssh/known_hosts
 
           # Prepare server directories
-          ssh -i ~/.ssh/id_ed25519 \
-            "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}" \
-            "sudo rm -f /var/www/pjcorsun/backend/backend"
-            
-          ssh -i ~/.ssh/id_ed25519 \
-            "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}" \
-            "sudo mkdir -p /var/www/pjcorsun/backend && \
-             sudo chown -R ${{ secrets.VPS_USER }}:${{ secrets.VPS_USER }} /var/www/pjcorsun"
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+            "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}" << EOF
+            sudo mkdir -p /var/www/pjcorsun/backend
+            sudo chown -R ${{ secrets.VPS_USER }}:${{ secrets.VPS_USER }} /var/www/pjcorsun
+            sudo rm -f /var/www/pjcorsun/backend/backend || true
+          EOF
 
           # Deploy frontend
-          scp -r -v -i ~/.ssh/id_ed25519 \
-            PJCFront/dist \
+          scp -v -i ~/.ssh/id_ed25519 -r PJCFront/dist \
             "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}":/var/www/pjcorsun/
 
           # Deploy backend
-          scp -i -v ~/.ssh/id_ed25519 \
-            PJCBack/backend \
+          scp -v -i ~/.ssh/id_ed25519 PJCBack/backend \
             "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}":/var/www/pjcorsun/backend/
 
           # Restart service
-          ssh -i ~/.ssh/id_ed25519 \
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
             "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}" \
             "sudo systemctl restart pjcorsun-backend"
