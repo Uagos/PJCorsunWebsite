@@ -33,7 +33,11 @@ jobs:
             exit 1
           fi
           file PJCBack/backend # Проверка архитектуры бинарника
-
+      - name: Remove old backend binary (if exists)
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}" \
+            "sudo rm -f /var/www/pjcorsun/backend/backend"
       - name: Deploy to VPS
         run: |
           # Setup SSH configuration
