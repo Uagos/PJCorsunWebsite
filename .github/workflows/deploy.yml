@@ -53,12 +53,12 @@ jobs:
              sudo chown -R ${{ secrets.VPS_USER }}:${{ secrets.VPS_USER }} /var/www/pjcorsun"
 
           # Deploy frontend
-          scp -r -i ~/.ssh/id_ed25519 \
+          scp -r -v -i ~/.ssh/id_ed25519 \
             PJCFront/dist \
             "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}":/var/www/pjcorsun/
 
           # Deploy backend
-          scp -i ~/.ssh/id_ed25519 \
+          scp -i -v ~/.ssh/id_ed25519 \
             PJCBack/backend \
             "${{ secrets.VPS_USER }}"@"${{ secrets.VPS_IP }}":/var/www/pjcorsun/backend/
 
