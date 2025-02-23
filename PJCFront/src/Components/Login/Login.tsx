@@ -24,7 +24,7 @@ const Login: React.FC = () => {
       console.error('Ошибка при логине:', error);
       setError(true);
     }
-  }///
+  }
 
   return (
     <div className="login-container">
